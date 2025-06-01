@@ -5,21 +5,17 @@ class MaimemoPlugin {
     this.loadSettings();
     this.bindEvents();
     
-    // 更新主题图标状态
     setTimeout(() => {
       this.updateThemeIcons();
     }, 100);
   }
 
   initializeTheme() {
-    // 先尝试加载保存的主题设置
     this.loadTheme();
     
-    // 如果没有保存的主题设置，默认使用暗色主题
     if (!this.manualThemeSet) {
       document.documentElement.classList.add('dark-theme');
       this.updateThemeIcons();
-      // 保存默认的暗色主题设置
       this.saveTheme('dark');
     }
   }
@@ -208,10 +204,8 @@ class MaimemoPlugin {
   }
 
   loadSettings() {
-    // 加载主题设置
     this.loadTheme();
     
-    // 从uTools数据库加载设置
     if (window.utools) {
       try {
         const tokenData = utools.db.get('maimemo_token');
@@ -223,7 +217,6 @@ class MaimemoPlugin {
           maimemoAPI.setToken(tokenData.data);
         }
         
-        // 优先使用用户手动设置的云词本ID，其次使用自动创建的
         if (notepadData && notepadData.data) {
           document.getElementById('notepadId').value = notepadData.data;
           maimemoAPI.setNotepadId(notepadData.data);
@@ -248,44 +241,36 @@ class MaimemoPlugin {
       this.saveSettings();
     });
 
-    // 添加单词
     document.getElementById('addWords').addEventListener('click', () => {
       this.addWords();
     });
 
-    // 自动聚焦到第一个空的输入框
     this.autoFocusFirstEmptyInput();
 
-    // 切换token显示
     document.getElementById('toggleToken').addEventListener('click', () => {
       this.toggleTokenVisibility();
     });
 
-    // 标题点击显示帮助弹窗
     document.getElementById('titleClick').addEventListener('click', () => {
       this.showHelpModal();
     });
 
-    // 关闭弹窗
     document.getElementById('closeModal').addEventListener('click', () => {
       this.hideHelpModal();
     });
 
-    // 点击弹窗外部关闭
     document.getElementById('helpModal').addEventListener('click', (e) => {
       if (e.target.id === 'helpModal') {
         this.hideHelpModal();
       }
     });
 
-    // ESC键关闭弹窗
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.hideHelpModal();
       }
     });
 
-    // 监听uTools输入
     if (window.utools) {
       utools.onPluginEnter(({ code, payload }) => {
         if (code === 'maimemo_add_word' && payload && payload !== '墨墨云词本') {
@@ -295,7 +280,6 @@ class MaimemoPlugin {
           if (words.length > 0) {
             document.getElementById('words').value = words.join('\n');
             this.showResult(`从剪切板检测到 ${words.length} 个单词`, 'info');
-            // 自动添加到云词本
             setTimeout(() => this.addWords(), 1000);
           } else {
             this.showResult('剪切板内容不包含有效的英文单词', 'error');
@@ -303,7 +287,6 @@ class MaimemoPlugin {
         }
       });
     }
-
   }
 
   toggleTokenVisibility() {
@@ -332,9 +315,7 @@ class MaimemoPlugin {
     }
 
     try {
-      // 保存到uTools数据库
       if (window.utools) {
-        // 保存token
         const existingToken = utools.db.get('maimemo_token');
         const tokenDoc = {
           _id: 'maimemo_token',
@@ -355,15 +336,12 @@ class MaimemoPlugin {
             notepadDoc._rev = existingNotepad._rev;
           }
           utools.db.put(notepadDoc);
-          // 如果用户手动设置了云词本ID，清除自动创建的缓存
           utools.db.remove('maimemo_notepad_id');
         } else {
-          // 如果用户清空了云词本ID，也清除手动设置的记录
           utools.db.remove('maimemo_notepad_id_setting');
         }
       }
 
-      // 设置API配置
       maimemoAPI.setToken(token);
       if (notepadId) {
         maimemoAPI.setNotepadId(notepadId);
@@ -386,7 +364,6 @@ class MaimemoPlugin {
       return;
     }
 
-    // 解析单词
     const words = this.parseWords(wordsText);
     
     if (words.length === 0) {
@@ -399,15 +376,12 @@ class MaimemoPlugin {
       const result = await maimemoAPI.addWords(words);
       this.showResult(result, 'success');
       
-      // 如果自动创建了新的云词本，更新界面显示
       if (maimemoAPI.notepadId && !document.getElementById('notepadId').value) {
         document.getElementById('notepadId').value = maimemoAPI.notepadId;
       }
       
-      // 清空输入框
       document.getElementById('words').value = '';
       
-      // 3秒后关闭uTools
       setTimeout(() => {
         if (window.utools) {
           utools.hideMainWindow();
@@ -420,18 +394,16 @@ class MaimemoPlugin {
   }
 
   parseWords(text) {
-    // 支持换行分隔和逗号分隔
     const words = text
-      .split(/[\n,]/) // 按换行或逗号分割
-      .map(word => word.trim()) // 去除空格
-      .filter(word => word && /^[a-zA-Z\s]+$/.test(word)) // 只保留英文单词
-      .filter(word => word.split(/\s+/).length <= 3); // 限制单词长度
+      .split(/[\n,]/)
+      .map(word => word.trim())
+      .filter(word => word && /^[a-zA-Z\s]+$/.test(word))
+      .filter(word => word.split(/\s+/).length <= 3);
     
-    return [...new Set(words)]; // 去重
+    return [...new Set(words)];
   }
 
   showToast(message, type = 'info') {
-    // 移除现有的toast
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
       existingToast.classList.add('hide');
@@ -442,35 +414,27 @@ class MaimemoPlugin {
       }, 300);
     }
     
-    // 创建新的toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
-    // 创建图标元素
     const icon = document.createElement('div');
     icon.className = 'toast-icon';
     
-    // 创建内容元素
     const content = document.createElement('div');
     content.className = 'toast-content';
     content.textContent = message;
     
-    // 组装toast结构
     toast.appendChild(icon);
     toast.appendChild(content);
     
-    // 添加到页面
     document.body.appendChild(toast);
     
-    // 显示动画
     setTimeout(() => {
       toast.classList.add('show');
     }, 50);
     
-    // 根据消息类型设置不同的隐藏时间
     const hideTime = type === 'error' ? 2000 : 1000;
     
-    // 添加鼠标悬停暂停功能
     let hideTimer;
     let progressPaused = false;
     
@@ -482,26 +446,21 @@ class MaimemoPlugin {
       }, hideTime);
     };
     
-    // 鼠标悬停时暂停隐藏
     toast.addEventListener('mouseenter', () => {
       progressPaused = true;
       clearTimeout(hideTimer);
     });
     
-    // 鼠标离开时继续隐藏
     toast.addEventListener('mouseleave', () => {
       progressPaused = false;
-      // 重新开始较短的隐藏计时
       startHideTimer();
     });
     
-    // 点击关闭
     toast.addEventListener('click', () => {
       clearTimeout(hideTimer);
       this.hideToast(toast);
     });
     
-    // 开始隐藏计时
     startHideTimer();
   }
   
@@ -517,7 +476,6 @@ class MaimemoPlugin {
     }
   }
   
-  // 兼容旧的showResult方法
   showResult(message, type) {
     this.showToast(message, type);
   }
@@ -526,7 +484,6 @@ class MaimemoPlugin {
     const modal = document.getElementById('helpModal');
     if (modal) {
       modal.style.display = 'block';
-      // 添加动画效果
       setTimeout(() => {
         modal.classList.add('show');
       }, 10);
@@ -544,7 +501,6 @@ class MaimemoPlugin {
   }
 
   autoFocusFirstEmptyInput() {
-    // 延迟执行以确保DOM完全加载
     setTimeout(() => {
       const inputs = [
         document.getElementById('token'),

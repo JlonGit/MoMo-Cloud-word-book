@@ -84,9 +84,9 @@ body::before {
 
 .container {
     width: 100%;
-    height: 100vh; /* 恢复原始容器高度 */
+    height: 100vh;
     margin: 0;
-    padding: 1.2rem; /* 进一步减小padding让内容更紧凑 */
+    padding: 1.2rem;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -96,22 +96,17 @@ body::before {
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     position: relative;
-    overflow: visible; /* 允许弹窗显示在容器外部 */
+    overflow: visible;
     box-sizing: border-box;
     max-width: 100vw;
     max-height: 100vh;
     display: flex;
     flex-direction: column;
 }
-
-
-
-
-
 .header {
     text-align: center;
-    margin-bottom: 0.6rem; /* 进一步减小间距 */
-    padding: 1rem 1rem 0.6rem; /* 进一步减小padding */
+    margin-bottom: 0.6rem;
+    padding: 1rem 1rem 0.6rem;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
     border-radius: var(--border-radius);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -124,12 +119,10 @@ body::before {
     overflow: hidden;
 }
 
-
-
 .header h1 {
     color: var(--text-primary);
-    margin-bottom: 0.15rem; /* 减小标题下间距 */
-    font-size: 1.5rem; /* 减小标题字体 */
+    margin-bottom: 0.15rem;
+    font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     background-size: 200% 200%;
@@ -142,26 +135,25 @@ body::before {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     display: inline-block;
-
 }
 
 .header p {
     color: var(--text-secondary);
-    font-size: 0.7rem; /* 减小副标题字体 */
+    font-size: 0.7rem;
     opacity: 0.8;
     margin: 0;
 }
 
 .form-group {
-    margin-bottom: 1rem; /* 减小表单组间距 */
+    margin-bottom: 1rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.3rem; /* 减小标签下间距 */
+    margin-bottom: 0.3rem;
     font-weight: 500;
     color: var(--text-primary);
-    font-size: 0.9rem; /* 减小标签字体 */
+    font-size: 0.9rem;
 }
 
 .form-group input,
@@ -188,7 +180,7 @@ body::before {
     height: auto;
 }
 
-/* 自定义滚动条样式 - 浅紫色滑块 */
+/* 自定义滚动条样式 */
 .form-group textarea::-webkit-scrollbar {
     width: 5px;
     background: transparent;
@@ -210,7 +202,7 @@ body::before {
     background: rgba(108, 122, 224, 0.8);
 }
 
-/* Firefox滚动条样式 - 浅紫色滑块 */
+/* Firefox滚动条样式 */
 .form-group textarea {
     scrollbar-width: thin;
     scrollbar-color: rgba(108, 122, 224, 0.6) transparent;
@@ -221,8 +213,8 @@ body::before {
     outline: none;
     border-color: rgba(102, 126, 234, 0.6);
     box-shadow: 
-        0 0 0 3px rgba(102, 126, 234, 0.25), /* 增大focus光晕，确保比hover更明显 */
-        0 4px 12px rgba(102, 126, 234, 0.15), /* 增强focus阴影 */
+        0 0 0 3px rgba(102, 126, 234, 0.25),
+        0 4px 12px rgba(102, 126, 234, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
@@ -232,18 +224,9 @@ body::before {
     border-color: rgba(102, 126, 234, 0.4);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
     box-shadow: 
-        0 0 0 1px rgba(102, 126, 234, 0.2), /* hover光晕小于focus */
+        0 0 0 1px rgba(102, 126, 234, 0.2),
         0 2px 8px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* 确保focus状态优先级高于hover */
-.form-group input:focus:hover,
-.form-group textarea:focus:hover {
-    box-shadow: 
-        0 0 0 3px rgba(102, 126, 234, 0.25),
-        0 4px 12px rgba(102, 126, 234, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .form-group input::placeholder,
@@ -325,8 +308,8 @@ body::before {
     color: white;
     width: 100%;
     border: 1px solid rgba(17, 153, 142, 0.3);
-    font-size: 0.8rem; /* 减小字体 */
-    padding: 0.8rem 1.2rem; /* 减小padding */
+    font-size: 0.8rem;
+    padding: 0.8rem 1.2rem;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -342,8 +325,8 @@ body::before {
 }
 
 .settings-section {
-    margin-bottom: 1rem; /* 进一步减小间距 */
-    padding: 1rem; /* 进一步减小padding */
+    margin-bottom: 1rem;
+    padding: 1rem;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
     border-radius: var(--border-radius);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -356,11 +339,9 @@ body::before {
     overflow: hidden;
 }
 
-
-
 .word-section {
-    margin-bottom: 0.8rem; /* 进一步减小间距 */
-    padding: 1.2rem; /* 进一步减小padding */
+    margin-bottom: 0.8rem;
+    padding: 1.2rem;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
     border-radius: var(--border-radius);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -375,12 +356,10 @@ body::before {
     overflow: hidden;
 }
 
-
-
 .result {
-    padding: 1rem; /* 减小结果区域padding */
+    padding: 1rem;
     border-radius: var(--border-radius);
-    margin-top: 1rem; /* 减小上边距 */
+    margin-top: 1rem;
     display: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-left: 4px solid;
@@ -393,7 +372,7 @@ body::before {
     font-weight: 500;
     letter-spacing: 0.025em;
     overflow: hidden;
-    font-size: 0.85rem; /* 减小结果文字大小 */
+    font-size: 0.85rem;
 }
 
 
@@ -500,7 +479,6 @@ body::before {
     transform: translateY(0);
 }
 
-/* 弹窗样式 */
 .modal {
     display: none;
     position: fixed;
@@ -511,8 +489,7 @@ body::before {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     opacity: 0;
-    transition: opacity 0.2s ease;
-    will-change: opacity;
+    transition: opacity 0.15s ease;
 }
 
 .modal.show {
@@ -530,17 +507,10 @@ body::before {
     max-height: 80vh;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
-    transform: translateY(-10px);
-    transition: transform 0.2s ease;
-    will-change: transform;
-}
-
-.modal.show .modal-content {
-    transform: translateY(0);
 }
 
 .modal-header {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+    background: var(--accent-primary);
     color: white;
     padding: 1.5rem;
     display: flex;
@@ -561,7 +531,6 @@ body::before {
     font-weight: bold;
     cursor: pointer;
     line-height: 1;
-    transition: var(--transition);
     padding: 0.25rem;
     border-radius: 50%;
     width: 2.5rem;
@@ -573,7 +542,6 @@ body::before {
 
 .close:hover {
     background-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
 }
 
 .modal-body {
@@ -744,7 +712,6 @@ html, body {
     animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* 简化主题切换按钮 */
 .theme-toggle {
     position: absolute;
     top: 1.5rem;
@@ -765,10 +732,7 @@ html, body {
     overflow: hidden;
 }
 
-/* 移除主题切换按钮光晕效果 */
-.theme-toggle::before {
-    display: none;
-}
+
 
 .theme-toggle:hover {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.1) 100%);
@@ -781,7 +745,6 @@ html, body {
     transform: scale(0.95);
 }
 
-/* 简化主题图标过渡 */
 .theme-icon {
     width: 1rem;
     height: 1rem;
@@ -828,21 +791,17 @@ body:not(.dark-theme) .moon-icon {
     position: fixed;
     top: 4.8rem;
     left: 50%;
-    transform: translateX(-50%) translateY(-120%) scale(0.8);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
     color: var(--text-primary);
     padding: 1rem 1.5rem;
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
     z-index: 9999;
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.12),
-        0 2px 8px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.2s ease;
     opacity: 0;
     pointer-events: none;
     min-width: 200px;
@@ -850,23 +809,16 @@ body:not(.dark-theme) .moon-icon {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    overflow: hidden;
 }
 
-/* 暗色主题下的弹窗样式 */
 .dark-theme .toast {
-    background: linear-gradient(135deg, rgba(33, 37, 41, 0.95) 0%, rgba(52, 58, 64, 0.95) 100%);
+    background: rgba(33, 37, 41, 0.95);
     color: var(--text-primary);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* 弹窗显示动画 */
 .toast.show {
-    transform: translateX(-50%) translateY(0) scale(1);
     opacity: 1;
     pointer-events: auto;
 }
@@ -891,15 +843,14 @@ body:not(.dark-theme) .moon-icon {
     line-height: 1.4;
 }
 
-/* 成功样式 */
 .toast.success {
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.95) 0%, rgba(32, 201, 151, 0.95) 100%);
+    background: rgba(25, 135, 84, 0.95);
     color: white;
     border-color: rgba(25, 135, 84, 0.3);
 }
 
 .dark-theme .toast.success {
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.9) 0%, rgba(32, 201, 151, 0.9) 100%);
+    background: rgba(25, 135, 84, 0.9);
 }
 
 .toast.success .toast-icon {
@@ -911,15 +862,14 @@ body:not(.dark-theme) .moon-icon {
     content: '✓';
 }
 
-/* 错误样式 */
 .toast.error {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.95) 0%, rgba(255, 99, 132, 0.95) 100%);
+    background: rgba(220, 53, 69, 0.95);
     color: white;
     border-color: rgba(220, 53, 69, 0.3);
 }
 
 .dark-theme .toast.error {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(255, 99, 132, 0.9) 100%);
+    background: rgba(220, 53, 69, 0.9);
 }
 
 .toast.error .toast-icon {
@@ -931,15 +881,14 @@ body:not(.dark-theme) .moon-icon {
     content: '✕';
 }
 
-/* 信息样式 */
 .toast.info {
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.95) 0%, rgba(54, 162, 235, 0.95) 100%);
+    background: rgba(13, 110, 253, 0.95);
     color: white;
     border-color: rgba(13, 110, 253, 0.3);
 }
 
 .dark-theme .toast.info {
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.9) 0%, rgba(54, 162, 235, 0.9) 100%);
+    background: rgba(13, 110, 253, 0.9);
 }
 
 .toast.info .toast-icon {
@@ -952,15 +901,14 @@ body:not(.dark-theme) .moon-icon {
     font-style: italic;
 }
 
-/* 警告样式 */
 .toast.warning {
-    background: linear-gradient(135deg, rgba(253, 126, 20, 0.95) 0%, rgba(255, 193, 7, 0.95) 100%);
+    background: rgba(253, 126, 20, 0.95);
     color: white;
     border-color: rgba(253, 126, 20, 0.3);
 }
 
 .dark-theme .toast.warning {
-    background: linear-gradient(135deg, rgba(253, 126, 20, 0.9) 0%, rgba(255, 193, 7, 0.9) 100%);
+    background: rgba(253, 126, 20, 0.9);
 }
 
 .toast.warning .toast-icon {
@@ -972,27 +920,6 @@ body:not(.dark-theme) .moon-icon {
     content: '!';
 }
 
-/* 进度条已移除 */
-
-/* 弹窗悬停效果 */
-.toast:hover {
-    transform: translateX(-50%) translateY(0) scale(1.02);
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.15),
-        0 4px 12px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.dark-theme .toast:hover {
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 4px 12px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* 弹窗退出动画 */
 .toast.hide {
-    transform: translateX(-50%) translateY(-120%) scale(0.8);
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53);
 }

@@ -5,7 +5,6 @@ class MaimemoAPI {
     this.notepadId = null;
   }
 
-  // 设置认证token
   setToken(token) {
     if (!token) {
       this.token = null;
@@ -14,12 +13,10 @@ class MaimemoAPI {
     this.token = token.startsWith('Bearer') ? token : `Bearer ${token}`;
   }
 
-  // 设置云词本ID
   setNotepadId(notepadId) {
     this.notepadId = notepadId;
   }
 
-  // 获取请求头
   getHeaders() {
     return {
       'Content-Type': 'application/json',
@@ -27,7 +24,6 @@ class MaimemoAPI {
     };
   }
 
-  // 创建新云词本
   async createNotepad(words) {
     const todayDate = new Date().toLocaleDateString('en-CA');
     
@@ -50,7 +46,6 @@ class MaimemoAPI {
       
       if (data.success && data.data?.notepad) {
         this.notepadId = data.data.notepad.id;
-        // 缓存notepadId到uTools数据库
         if (window.utools) {
           utools.db.put({
             _id: 'maimemo_notepad_id',
@@ -66,7 +61,6 @@ class MaimemoAPI {
     }
   }
 
-  // 添加单词到现有云词本
   async addWordsToNotepad(notepadId, words) {
     const todayDate = new Date().toLocaleDateString('en-CA');
     
@@ -86,7 +80,6 @@ class MaimemoAPI {
       const { status, content, title, brief, tags } = getData.data.notepad;
       const lines = content.split('\n').map(line => line.trim());
       
-      // 查找今日日期标题
       let targetLineIndex = lines.findIndex(line => 
         line.startsWith(`# ${todayDate}`)
       );
@@ -97,10 +90,8 @@ class MaimemoAPI {
         targetLineIndex = 0;
       }
       
-      // 在日期标题后插入新单词
       lines.splice(targetLineIndex + 1, 0, ...words);
 
-      // 更新云词本
       const updateResponse = await fetch(`${this.apiEndpoint}/notepads/${notepadId}`, {
         method: 'POST',
         headers: this.getHeaders(),
@@ -127,13 +118,11 @@ class MaimemoAPI {
     }
   }
 
-  // 主要添加单词方法
   async addWords(words) {
     if (!this.token) {
       throw new Error('请先配置墨墨开放API Token');
     }
 
-    // 尝试从缓存获取notepadId
     if (!this.notepadId && window.utools) {
       const cached = utools.db.get('maimemo_notepad_id');
       if (cached) {
@@ -149,5 +138,4 @@ class MaimemoAPI {
   }
 }
 
-// 导出API实例
 window.maimemoAPI = new MaimemoAPI();
