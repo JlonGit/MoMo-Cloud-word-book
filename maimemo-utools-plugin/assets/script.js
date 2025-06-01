@@ -12,66 +12,69 @@ class MaimemoPlugin {
   }
 
   initializeTheme() {
-    // 默认设置为暗色主题
-    document.documentElement.classList.add('dark-theme');
-    
-    // 尝试加载保存的主题设置
+    // 先尝试加载保存的主题设置
     this.loadTheme();
     
-    this.manualThemeSet = false;
+    // 如果没有保存的主题设置，默认使用暗色主题
+    if (!this.manualThemeSet) {
+      document.documentElement.classList.add('dark-theme');
+      this.updateThemeIcons();
+      // 保存默认的暗色主题设置
+      this.saveTheme('dark');
+    }
   }
 
   toggleTheme() {
     const isDark = document.documentElement.classList.contains('dark-theme');
-    const sunIcon = document.querySelector('.sun-icon');
-    const moonIcon = document.querySelector('.moon-icon');
     
     if (isDark) {
       document.documentElement.classList.remove('dark-theme');
-      sunIcon.style.display = 'block';
-      moonIcon.style.display = 'none';
       this.showToast('已切换到亮色模式', 'info');
+      this.saveTheme('light');
     } else {
       document.documentElement.classList.add('dark-theme');
-      sunIcon.style.display = 'none';
-      moonIcon.style.display = 'block';
       this.showToast('已切换到暗色模式', 'info');
+      this.saveTheme('dark');
     }
-    this.manualThemeSet = true;
     
-    // 保存主题设置
-    if (window.utools) {
-      try {
-        const themeDoc = {
-          _id: 'maimemo_theme',
-          data: !isDark ? 'light' : 'dark'
-        };
-        const existing = utools.db.get('maimemo_theme');
-        if (existing && existing._rev) {
-          themeDoc._rev = existing._rev;
-        }
-        utools.db.put(themeDoc);
-      } catch (error) {
-        console.error('Save theme error:', error);
-      }
-    }
+    this.manualThemeSet = true;
+    this.updateThemeIcons();
   }
 
   loadTheme() {
+    this.manualThemeSet = false;
     if (window.utools) {
       try {
         const themeData = utools.db.get('maimemo_theme');
         if (themeData && themeData.data) {
           this.manualThemeSet = true;
+          // 清除默认主题
+          document.documentElement.classList.remove('dark-theme');
           if (themeData.data === 'dark') {
             document.documentElement.classList.add('dark-theme');
-          } else {
-            document.documentElement.classList.remove('dark-theme');
           }
           this.updateThemeIcons();
         }
       } catch (error) {
         console.error('Load theme error:', error);
+      }
+    }
+  }
+
+  saveTheme(theme) {
+    if (window.utools) {
+      try {
+        const themeDoc = {
+          _id: 'maimemo_theme',
+          data: theme
+        };
+        const existing = utools.db.get('maimemo_theme');
+        if (existing) {
+          themeDoc._rev = existing._rev;
+        }
+        utools.db.put(themeDoc);
+      } catch (error) {
+        console.error('Save theme error:', error);
       }
     }
   }
@@ -115,7 +118,7 @@ class MaimemoPlugin {
           </span>
         </button>
         <div class="header">
-          <h1>墨墨云词本</h1>
+          <h1 id="titleClick" class="clickable-title" title="点击查看使用说明">墨墨云词本</h1>
           <p>快速添加单词到墨墨背单词</p>
         </div>
         
@@ -148,6 +151,58 @@ class MaimemoPlugin {
         </div>
         
         <div id="result" class="result"></div>
+      </div>
+      
+      <!-- 使用说明弹窗 -->
+      <div id="helpModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>墨墨云词本使用说明</h2>
+            <span class="close" id="closeModal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <div class="help-section">
+              <h3>📋 功能介绍</h3>
+              <p>墨墨云词本是一个uTools插件，帮助您快速将单词添加到墨墨背单词的云词本中。</p>
+            </div>
+            
+            <div class="help-section">
+              <h3>🔧 设置步骤</h3>
+              <ol>
+                <li><strong>获取API Token：</strong>
+                  <ul>
+                    <li>打开墨墨背单词APP</li>
+                    <li>进入「我的」→「更多设置」→「实验功能」→「开放API」→ 点击查看获取 API token</li>
+                    <li>复制您的API Token</li>
+                  </ul>
+                </li>
+                <li><strong>配置插件：</strong>
+                  <ul>
+                    <li>将API Token粘贴到「墨墨开放API Token」输入框</li>
+                    <li>云词本ID可选填，留空将自动创建新词本，不知道云词本ID建议留空自动生成，生成的云词本ID会自动保存（建议备份）</li>
+                    <li>点击「保存设置」</li>
+                  </ul>
+                </li>
+              </ol>
+            </div>
+            
+            <div class="help-section">
+              <h3>📝 使用方法</h3>
+              <ol>
+                <li>在单词输入框中输入要添加的单词</li>
+                <li>支持两种格式：
+                  <ul>
+                    <li>每行一个单词</li>
+                    <li>用逗号分隔多个单词</li>
+                  </ul>
+                </li>
+                <li>点击「添加到云词本」按钮</li>
+                <li>等待添加完成，查看结果反馈</li>
+                <li>支持剪切板识别，呼出超级面板，一键上传</li>
+              </ol>
+            </div>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -218,6 +273,30 @@ class MaimemoPlugin {
     // 切换token显示
     document.getElementById('toggleToken').addEventListener('click', () => {
       this.toggleTokenVisibility();
+    });
+
+    // 标题点击显示帮助弹窗
+    document.getElementById('titleClick').addEventListener('click', () => {
+      this.showHelpModal();
+    });
+
+    // 关闭弹窗
+    document.getElementById('closeModal').addEventListener('click', () => {
+      this.hideHelpModal();
+    });
+
+    // 点击弹窗外部关闭
+    document.getElementById('helpModal').addEventListener('click', (e) => {
+      if (e.target.id === 'helpModal') {
+        this.hideHelpModal();
+      }
+    });
+
+    // ESC键关闭弹窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.hideHelpModal();
+      }
     });
 
     // 监听uTools输入
@@ -396,13 +475,30 @@ class MaimemoPlugin {
     // 移除现有的toast
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
-      existingToast.remove();
+      existingToast.classList.add('hide');
+      setTimeout(() => {
+        if (existingToast.parentNode) {
+          existingToast.remove();
+        }
+      }, 300);
     }
     
     // 创建新的toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.textContent = message;
+    
+    // 创建图标元素
+    const icon = document.createElement('div');
+    icon.className = 'toast-icon';
+    
+    // 创建内容元素
+    const content = document.createElement('div');
+    content.className = 'toast-content';
+    content.textContent = message;
+    
+    // 组装toast结构
+    toast.appendChild(icon);
+    toast.appendChild(content);
     
     // 添加到页面
     document.body.appendChild(toast);
@@ -410,18 +506,56 @@ class MaimemoPlugin {
     // 显示动画
     setTimeout(() => {
       toast.classList.add('show');
-    }, 10);
+    }, 50);
     
     // 根据消息类型设置不同的隐藏时间
-    const hideTime = type === 'error' ? 4000 : 2500;
-    setTimeout(() => {
+    const hideTime = type === 'error' ? 2000 : 1000;
+    
+    // 添加鼠标悬停暂停功能
+    let hideTimer;
+    let progressPaused = false;
+    
+    const startHideTimer = () => {
+      hideTimer = setTimeout(() => {
+        if (!progressPaused) {
+          this.hideToast(toast);
+        }
+      }, hideTime);
+    };
+    
+    // 鼠标悬停时暂停隐藏
+    toast.addEventListener('mouseenter', () => {
+      progressPaused = true;
+      clearTimeout(hideTimer);
+    });
+    
+    // 鼠标离开时继续隐藏
+    toast.addEventListener('mouseleave', () => {
+      progressPaused = false;
+      // 重新开始较短的隐藏计时
+      startHideTimer();
+    });
+    
+    // 点击关闭
+    toast.addEventListener('click', () => {
+      clearTimeout(hideTimer);
+      this.hideToast(toast);
+    });
+    
+    // 开始隐藏计时
+    startHideTimer();
+  }
+  
+  hideToast(toast) {
+    if (toast && toast.parentNode) {
       toast.classList.remove('show');
+      toast.classList.add('hide');
       setTimeout(() => {
         if (toast.parentNode) {
           toast.remove();
         }
       }, 300);
-    }, hideTime);
+    }
   }
   
   // 兼容旧的showResult方法
@@ -429,9 +563,26 @@ class MaimemoPlugin {
     this.showToast(message, type);
   }
 
+  showHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (modal) {
+      modal.style.display = 'block';
+      // 添加动画效果
+      setTimeout(() => {
+        modal.classList.add('show');
+      }, 10);
+    }
+  }
 
-
-
+  hideHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (modal) {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    }
+  }
 }
 
 // 初始化插件
