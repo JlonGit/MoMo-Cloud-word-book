@@ -1,14 +1,119 @@
 class MaimemoPlugin {
   constructor() {
+    this.initializeTheme();
     this.initializeUI();
     this.loadSettings();
     this.bindEvents();
+    
+    // 更新主题图标状态
+    setTimeout(() => {
+      this.updateThemeIcons();
+    }, 100);
+  }
+
+  initializeTheme() {
+    // 默认设置为暗色主题
+    document.documentElement.classList.add('dark-theme');
+    
+    // 尝试加载保存的主题设置
+    this.loadTheme();
+    
+    this.manualThemeSet = false;
+  }
+
+  toggleTheme() {
+    const isDark = document.documentElement.classList.contains('dark-theme');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    
+    if (isDark) {
+      document.documentElement.classList.remove('dark-theme');
+      sunIcon.style.display = 'block';
+      moonIcon.style.display = 'none';
+      this.showToast('已切换到亮色模式', 'info');
+    } else {
+      document.documentElement.classList.add('dark-theme');
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'block';
+      this.showToast('已切换到暗色模式', 'info');
+    }
+    this.manualThemeSet = true;
+    
+    // 保存主题设置
+    if (window.utools) {
+      try {
+        const themeDoc = {
+          _id: 'maimemo_theme',
+          data: !isDark ? 'light' : 'dark'
+        };
+        const existing = utools.db.get('maimemo_theme');
+        if (existing && existing._rev) {
+          themeDoc._rev = existing._rev;
+        }
+        utools.db.put(themeDoc);
+      } catch (error) {
+        console.error('Save theme error:', error);
+      }
+    }
+  }
+
+  loadTheme() {
+    if (window.utools) {
+      try {
+        const themeData = utools.db.get('maimemo_theme');
+        if (themeData && themeData.data) {
+          this.manualThemeSet = true;
+          if (themeData.data === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+          } else {
+            document.documentElement.classList.remove('dark-theme');
+          }
+          this.updateThemeIcons();
+        }
+      } catch (error) {
+        console.error('Load theme error:', error);
+      }
+    }
+  }
+  
+  updateThemeIcons() {
+    const isDark = document.documentElement.classList.contains('dark-theme');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    
+    if (sunIcon && moonIcon) {
+      if (isDark) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      }
+    }
   }
 
   initializeUI() {
     // 创建主界面
     document.body.innerHTML = `
       <div class="container">
+        <button class="theme-toggle" id="themeToggle" title="切换主题">
+          <span class="theme-icon">
+            <svg viewBox="0 0 24 24" class="sun-icon">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg viewBox="0 0 24 24" class="moon-icon" style="display: none;">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </span>
+        </button>
         <div class="header">
           <h1>墨墨云词本</h1>
           <p>快速添加单词到墨墨背单词</p>
@@ -23,7 +128,6 @@ class MaimemoPlugin {
                 <span class="eye-icon">👁</span>
               </button>
             </div>
-            <small>获取方式: <a href="https://open.maimemo.com/" target="_blank">https://open.maimemo.com/</a></small>
           </div>
           
           <div class="form-group">
@@ -49,6 +153,9 @@ class MaimemoPlugin {
   }
 
   loadSettings() {
+    // 加载主题设置
+    this.loadTheme();
+    
     // 从uTools数据库加载设置
     if (window.utools) {
       try {
@@ -93,6 +200,11 @@ class MaimemoPlugin {
   }
 
   bindEvents() {
+    // 主题切换
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      this.toggleTheme();
+    });
+
     // 保存设置
     document.getElementById('saveSettings').addEventListener('click', () => {
       this.saveSettings();
@@ -280,16 +392,41 @@ class MaimemoPlugin {
     return [...new Set(words)]; // 去重
   }
 
-  showResult(message, type) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.className = `result ${type}`;
-    resultDiv.textContent = message;
-    resultDiv.style.display = 'block';
+  showToast(message, type = 'info') {
+    // 移除现有的toast
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
     
-    // 3秒后隐藏结果
+    // 创建新的toast
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    // 添加到页面
+    document.body.appendChild(toast);
+    
+    // 显示动画
     setTimeout(() => {
-      resultDiv.style.display = 'none';
-    }, 3000);
+      toast.classList.add('show');
+    }, 10);
+    
+    // 根据消息类型设置不同的隐藏时间
+    const hideTime = type === 'error' ? 4000 : 2500;
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, hideTime);
+  }
+  
+  // 兼容旧的showResult方法
+  showResult(message, type) {
+    this.showToast(message, type);
   }
 
 
