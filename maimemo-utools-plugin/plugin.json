@@ -17,7 +17,6 @@
       "code": "maimemo_add_word",
       "explain": "添加单词到墨墨云词本",
       "cmds": [
-        "墨墨",
         "maimemo",
         {
           "type": "regex",

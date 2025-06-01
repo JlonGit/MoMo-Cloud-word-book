@@ -137,3 +137,38 @@ body {
     color: #0c5460;
     border: 1px solid #bee5eb;
 }
+
+/* Token输入框与切换按钮样式 */
+.input-with-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-toggle input {
+    flex: 1;
+    padding-right: 45px;
+}
+
+.toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.eye-icon {
+    font-size: 16px;
+    user-select: none;
+}

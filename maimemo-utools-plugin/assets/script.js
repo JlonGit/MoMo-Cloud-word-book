@@ -17,7 +17,12 @@ class MaimemoPlugin {
         <div class="settings-section">
           <div class="form-group">
             <label for="token">墨墨开放API Token:</label>
-            <input type="password" id="token" placeholder="请输入墨墨开放API Token">
+            <div class="input-with-toggle">
+              <input type="password" id="token" placeholder="请输入墨墨开放API Token">
+              <button type="button" id="toggleToken" class="toggle-btn" title="切换显示/隐藏">
+                <span class="eye-icon">👁</span>
+              </button>
+            </div>
             <small>获取方式: <a href="https://open.maimemo.com/" target="_blank">https://open.maimemo.com/</a></small>
           </div>
           
@@ -98,13 +103,37 @@ class MaimemoPlugin {
       this.addWords();
     });
 
+    // 切换token显示
+    document.getElementById('toggleToken').addEventListener('click', () => {
+      this.toggleTokenVisibility();
+    });
+
     // 监听uTools输入
     if (window.utools) {
       utools.onPluginEnter(({ code, type, payload }) => {
         if (code === 'maimemo_add_word' && payload) {
-          document.getElementById('words').value = payload;
+          // 只有当payload不是触发关键词时才设置为输入值
+          if (payload !== 'maimemo' && payload !== '墨墨') {
+            document.getElementById('words').value = payload;
+          }
         }
       });
+    }
+  }
+
+  toggleTokenVisibility() {
+    const tokenInput = document.getElementById('token');
+    const toggleBtn = document.getElementById('toggleToken');
+    const eyeIcon = toggleBtn.querySelector('.eye-icon');
+    
+    if (tokenInput.type === 'password') {
+      tokenInput.type = 'text';
+      eyeIcon.textContent = '🙈';
+      toggleBtn.title = '隐藏token';
+    } else {
+      tokenInput.type = 'password';
+      eyeIcon.textContent = '👁';
+      toggleBtn.title = '显示token';
     }
   }
 
