@@ -26,6 +26,19 @@
           "maxLength": 100
         }
       ]
+    },
+    {
+      "code": "maimemo_clipboard",
+      "explain": "从剪切板添加单词到墨墨云词本",
+      "cmds": [
+        {
+          "type": "over",
+          "label": "添加到墨墨",
+          "match": "/^[a-zA-Z\\s.,!?;:()\"'-]+$/",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      ]
     }
   ]
 }

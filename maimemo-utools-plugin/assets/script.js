@@ -116,9 +116,27 @@ class MaimemoPlugin {
           if (payload !== 'maimemo' && payload !== '墨墨') {
             document.getElementById('words').value = payload;
           }
+        } else if (code === 'maimemo_clipboard') {
+          // 处理剪切板内容
+          if (payload) {
+            // 验证剪切板内容是否为有效的英文单词
+            const words = this.parseWords(payload);
+            if (words.length > 0) {
+              document.getElementById('words').value = words.join('\n');
+              this.showResult(`从剪切板检测到 ${words.length} 个单词`, 'info');
+              
+              // 自动添加到云词本
+              setTimeout(async () => {
+                await this.addWords();
+              }, 1000);
+            } else {
+              this.showResult('剪切板内容不包含有效的英文单词', 'error');
+            }
+          }
         }
       });
     }
+
   }
 
   toggleTokenVisibility() {
@@ -273,6 +291,10 @@ class MaimemoPlugin {
       resultDiv.style.display = 'none';
     }, 3000);
   }
+
+
+
+
 }
 
 // 初始化插件

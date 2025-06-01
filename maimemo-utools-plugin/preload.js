@@ -22,5 +22,15 @@ window.exports = {
         window.utools.hideMainWindow();
       }
     }
+  },
+  "maimemo_clipboard": {
+    mode: "none",
+    args: {
+      enter: (action) => {
+        console.log('从剪切板添加单词:', action.payload);
+        // 直接打开主窗口
+        window.utools.showMainWindow();
+      }
+    }
   }
 };
