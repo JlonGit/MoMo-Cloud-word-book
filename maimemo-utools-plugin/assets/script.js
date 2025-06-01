@@ -218,39 +218,22 @@ class MaimemoPlugin {
         const notepadData = utools.db.get('maimemo_notepad_id_setting');
         const cachedNotepadData = utools.db.get('maimemo_notepad_id');
         
-        console.log('Loading settings...');
-         console.log('Token data:', tokenData);
-         console.log('Token data type:', typeof tokenData);
-         console.log('Token data keys:', tokenData ? Object.keys(tokenData) : 'null');
-         console.log('Token data.data:', tokenData ? tokenData.data : 'undefined');
-         console.log('Notepad data:', notepadData);
-         console.log('Cached notepad data:', cachedNotepadData);
-         
-         if (tokenData && tokenData.data) {
-           document.getElementById('token').value = tokenData.data;
-           maimemoAPI.setToken(tokenData.data);
-           console.log('Token loaded successfully:', tokenData.data);
-         } else {
-           console.log('No token found in database. TokenData:', tokenData);
-         }
+        if (tokenData && tokenData.data) {
+          document.getElementById('token').value = tokenData.data;
+          maimemoAPI.setToken(tokenData.data);
+        }
         
         // 优先使用用户手动设置的云词本ID，其次使用自动创建的
         if (notepadData && notepadData.data) {
           document.getElementById('notepadId').value = notepadData.data;
           maimemoAPI.setNotepadId(notepadData.data);
-          console.log('Manual notepad ID loaded:', notepadData.data);
         } else if (cachedNotepadData && cachedNotepadData.data) {
           document.getElementById('notepadId').value = cachedNotepadData.data;
           maimemoAPI.setNotepadId(cachedNotepadData.data);
-          console.log('Cached notepad ID loaded:', cachedNotepadData.data);
-        } else {
-          console.log('No notepad ID found');
         }
       } catch (error) {
         console.error('Load settings error:', error);
       }
-    } else {
-      console.warn('uTools API not available during load');
     }
   }
 
@@ -269,6 +252,9 @@ class MaimemoPlugin {
     document.getElementById('addWords').addEventListener('click', () => {
       this.addWords();
     });
+
+    // 自动聚焦到第一个空的输入框
+    this.autoFocusFirstEmptyInput();
 
     // 切换token显示
     document.getElementById('toggleToken').addEventListener('click', () => {
@@ -301,28 +287,18 @@ class MaimemoPlugin {
 
     // 监听uTools输入
     if (window.utools) {
-      utools.onPluginEnter(({ code, type, payload }) => {
-        if (code === 'maimemo_add_word' && payload) {
-          // 只有当payload不是触发关键词时才设置为输入值
-          if (payload !== 'maimemo' && payload !== '墨墨') {
-            document.getElementById('words').value = payload;
-          }
-        } else if (code === 'maimemo_clipboard') {
-          // 处理剪切板内容
-          if (payload) {
-            // 验证剪切板内容是否为有效的英文单词
-            const words = this.parseWords(payload);
-            if (words.length > 0) {
-              document.getElementById('words').value = words.join('\n');
-              this.showResult(`从剪切板检测到 ${words.length} 个单词`, 'info');
-              
-              // 自动添加到云词本
-              setTimeout(async () => {
-                await this.addWords();
-              }, 1000);
-            } else {
-              this.showResult('剪切板内容不包含有效的英文单词', 'error');
-            }
+      utools.onPluginEnter(({ code, payload }) => {
+        if (code === 'maimemo_add_word' && payload && payload !== '墨墨云词本') {
+          document.getElementById('words').value = payload;
+        } else if (code === 'maimemo_clipboard' && payload) {
+          const words = this.parseWords(payload);
+          if (words.length > 0) {
+            document.getElementById('words').value = words.join('\n');
+            this.showResult(`从剪切板检测到 ${words.length} 个单词`, 'info');
+            // 自动添加到云词本
+            setTimeout(() => this.addWords(), 1000);
+          } else {
+            this.showResult('剪切板内容不包含有效的英文单词', 'error');
           }
         }
       });
@@ -367,8 +343,7 @@ class MaimemoPlugin {
         if (existingToken && existingToken._rev) {
           tokenDoc._rev = existingToken._rev;
         }
-        const tokenResult = utools.db.put(tokenDoc);
-        console.log('Token save result:', tokenResult);
+        utools.db.put(tokenDoc);
         
         if (notepadId) {
           const existingNotepad = utools.db.get('maimemo_notepad_id_setting');
@@ -379,29 +354,13 @@ class MaimemoPlugin {
           if (existingNotepad && existingNotepad._rev) {
             notepadDoc._rev = existingNotepad._rev;
           }
-          const notepadResult = utools.db.put(notepadDoc);
-          console.log('Notepad ID save result:', notepadResult);
+          utools.db.put(notepadDoc);
           // 如果用户手动设置了云词本ID，清除自动创建的缓存
           utools.db.remove('maimemo_notepad_id');
         } else {
           // 如果用户清空了云词本ID，也清除手动设置的记录
           utools.db.remove('maimemo_notepad_id_setting');
         }
-        
-        // 验证保存是否成功
-          const savedToken = utools.db.get('maimemo_token');
-          console.log('Saved token verification:', savedToken);
-          console.log('Saved token type:', typeof savedToken);
-          console.log('Saved token keys:', savedToken ? Object.keys(savedToken) : 'null');
-          console.log('Saved token data property:', savedToken ? savedToken.data : 'undefined');
-          console.log('Saved token stringified:', JSON.stringify(savedToken));
-          
-          if (!savedToken || !savedToken.data) {
-            throw new Error('Token保存失败');
-          }
-          console.log('Token save operation completed successfully');
-      } else {
-        console.warn('uTools API not available');
       }
 
       // 设置API配置
@@ -453,7 +412,7 @@ class MaimemoPlugin {
         if (window.utools) {
           utools.hideMainWindow();
         }
-      }, 3000);
+      }, 1500);
       
     } catch (error) {
       this.showResult(error.message, 'error');
@@ -582,6 +541,24 @@ class MaimemoPlugin {
         modal.style.display = 'none';
       }, 300);
     }
+  }
+
+  autoFocusFirstEmptyInput() {
+    // 延迟执行以确保DOM完全加载
+    setTimeout(() => {
+      const inputs = [
+        document.getElementById('token'),
+        document.getElementById('notepadId'),
+        document.getElementById('words')
+      ];
+      
+      for (const input of inputs) {
+        if (input && !input.value.trim()) {
+          input.focus();
+          break;
+        }
+      }
+    }, 200);
   }
 }
 

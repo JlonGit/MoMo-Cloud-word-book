@@ -1,7 +1,7 @@
 {
   "pluginName": "墨墨云词本",
   "description": "快速添加单词到墨墨背单词云词本",
-  "author": "你的名字",
+  "author": "JJJ",
   "homepage": "https://github.com/your-username/maimemo-utools-plugin",
   "version": "1.0.0",
   "logo": "logo.png",
@@ -17,7 +17,7 @@
       "code": "maimemo_add_word",
       "explain": "添加单词到墨墨云词本",
       "cmds": [
-        "maimemo",
+        "墨墨云词本",
         {
           "type": "regex",
           "label": "添加单词",

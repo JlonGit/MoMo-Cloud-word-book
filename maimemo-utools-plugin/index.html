@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="墨墨云词本 uTools 插件 - 快速添加单词到墨墨背单词">
-    <meta name="keywords" content="墨墨背单词,云词本,uTools,插件,英语学习">
     <title>墨墨云词本</title>
     <link rel="stylesheet" href="assets/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <style>
-        /* 防止页面闪烁 */
         body {
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
@@ -23,11 +19,8 @@
     <script src="lib/maimemo-api.js"></script>
     <script src="assets/script.js"></script>
     <script>
-        // 页面加载完成后显示
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-            }, 100);
+            setTimeout(() => document.body.classList.add('loaded'), 100);
         });
     </script>
 </body>
