@@ -413,20 +413,11 @@ class MaimemoPlugin {
         }
       }, 300);
     }
-    
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
-    const icon = document.createElement('div');
-    icon.className = 'toast-icon';
-    
-    const content = document.createElement('div');
-    content.className = 'toast-content';
-    content.textContent = message;
-    
-    toast.appendChild(icon);
-    toast.appendChild(content);
-    
+    toast.textContent = message;
+
     document.body.appendChild(toast);
     
     setTimeout(() => {
