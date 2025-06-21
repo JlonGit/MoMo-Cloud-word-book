@@ -1,92 +1,153 @@
 class MaimemoPlugin {
   constructor() {
+    this.themeMode = 'auto'; // 'auto', 'light', 'dark'
     this.initializeTheme();
     this.initializeUI();
     this.loadSettings();
     this.bindEvents();
-    
+
     setTimeout(() => {
       this.updateThemeIcons();
     }, 100);
   }
 
   initializeTheme() {
-    this.loadTheme();
-    
-    if (!this.manualThemeSet) {
-      document.documentElement.classList.add('dark-theme');
-      this.updateThemeIcons();
-      this.saveTheme('dark');
-    }
-  }
+    this.loadThemeMode();
 
-  toggleTheme() {
-    const isDark = document.documentElement.classList.contains('dark-theme');
-    
-    if (isDark) {
-      document.documentElement.classList.remove('dark-theme');
-      this.showToast('已切换到亮色模式', 'info');
-      this.saveTheme('light');
+    if (this.themeMode === 'auto') {
+      this.applyAutoTheme();
+      this.startThemeMonitoring();
     } else {
-      document.documentElement.classList.add('dark-theme');
-      this.showToast('已切换到暗色模式', 'info');
-      this.saveTheme('dark');
+      this.applyManualTheme(this.themeMode);
     }
-    
-    this.manualThemeSet = true;
+
     this.updateThemeIcons();
   }
 
-  loadTheme() {
-    this.manualThemeSet = false;
+  toggleTheme() {
+    // 循环切换：自动 -> 亮色 -> 暗色 -> 自动
+    if (this.themeMode === 'auto') {
+      this.themeMode = 'light';
+      this.applyManualTheme('light');
+      this.showToast('已切换到亮色模式', 'info');
+      this.stopThemeMonitoring();
+    } else if (this.themeMode === 'light') {
+      this.themeMode = 'dark';
+      this.applyManualTheme('dark');
+      this.showToast('已切换到暗色模式', 'info');
+    } else {
+      this.themeMode = 'auto';
+      this.applyAutoTheme();
+      this.showToast('已切换到自动模式', 'info');
+      this.startThemeMonitoring();
+    }
+
+    this.saveThemeMode();
+    this.updateThemeIcons();
+  }
+
+  loadThemeMode() {
     if (window.utools) {
       try {
-        const themeData = utools.db.get('maimemo_theme');
-        if (themeData && themeData.data) {
-          this.manualThemeSet = true;
-          // 清除默认主题
-          document.documentElement.classList.remove('dark-theme');
-          if (themeData.data === 'dark') {
-            document.documentElement.classList.add('dark-theme');
-          }
-          this.updateThemeIcons();
+        const themeModeData = utools.db.get('maimemo_theme_mode');
+        if (themeModeData && themeModeData.data) {
+          this.themeMode = themeModeData.data;
+        } else {
+          this.themeMode = 'auto'; // 默认自动模式
         }
       } catch (error) {
-        console.error('Load theme error:', error);
+        console.error('Load theme mode error:', error);
+        this.themeMode = 'auto';
+      }
+    } else {
+      this.themeMode = 'auto';
+    }
+  }
+
+  saveThemeMode() {
+    if (window.utools) {
+      try {
+        const themeModeDoc = {
+          _id: 'maimemo_theme_mode',
+          data: this.themeMode
+        };
+        const existing = utools.db.get('maimemo_theme_mode');
+        if (existing) {
+          themeModeDoc._rev = existing._rev;
+        }
+        utools.db.put(themeModeDoc);
+      } catch (error) {
+        console.error('Save theme mode error:', error);
       }
     }
   }
 
-  saveTheme(theme) {
-    if (window.utools) {
-      try {
-        const themeDoc = {
-          _id: 'maimemo_theme',
-          data: theme
-        };
-        const existing = utools.db.get('maimemo_theme');
-        if (existing) {
-          themeDoc._rev = existing._rev;
-        }
-        utools.db.put(themeDoc);
-      } catch (error) {
-        console.error('Save theme error:', error);
+  applyAutoTheme() {
+    if (window.utools && typeof utools.isDarkColors === 'function') {
+      const isDark = utools.isDarkColors();
+      if (isDark) {
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
       }
+    } else {
+      // 如果无法检测，默认使用亮色主题
+      document.documentElement.classList.remove('dark-theme');
+    }
+  }
+
+  applyManualTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-theme');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
+    }
+  }
+
+  startThemeMonitoring() {
+    if (window.utools && typeof utools.isDarkColors === 'function') {
+      this.themeMonitorInterval = setInterval(() => {
+        if (this.themeMode === 'auto') {
+          const currentIsDark = document.documentElement.classList.contains('dark-theme');
+          const systemIsDark = utools.isDarkColors();
+
+          if (currentIsDark !== systemIsDark) {
+            this.applyAutoTheme();
+            this.updateThemeIcons();
+          }
+        }
+      }, 1000); // 每秒检查一次
+    }
+  }
+
+  stopThemeMonitoring() {
+    if (this.themeMonitorInterval) {
+      clearInterval(this.themeMonitorInterval);
+      this.themeMonitorInterval = null;
     }
   }
   
   updateThemeIcons() {
-    const isDark = document.documentElement.classList.contains('dark-theme');
+    const themeToggle = document.querySelector('.theme-toggle');
     const sunIcon = document.querySelector('.sun-icon');
     const moonIcon = document.querySelector('.moon-icon');
-    
-    if (sunIcon && moonIcon) {
-      if (isDark) {
-        sunIcon.style.display = 'none';
+    const autoIcon = document.querySelector('.auto-icon');
+
+    if (themeToggle && sunIcon && moonIcon && autoIcon) {
+      // 隐藏所有图标
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'none';
+      autoIcon.style.display = 'none';
+
+      if (this.themeMode === 'auto') {
+        autoIcon.style.display = 'block';
+        themeToggle.title = '当前：自动模式 (点击切换到亮色模式)';
+      } else if (this.themeMode === 'dark') {
         moonIcon.style.display = 'block';
+        themeToggle.title = '当前：暗色模式 (点击切换到自动模式)';
       } else {
         sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
+        themeToggle.title = '当前：亮色模式 (点击切换到暗色模式)';
       }
     }
   }
@@ -111,11 +172,14 @@ class MaimemoPlugin {
             <svg viewBox="0 0 24 24" class="moon-icon" style="display: none;">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
+            <svg viewBox="0 0 24 24" class="auto-icon" style="display: none;">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+            </svg>
           </span>
         </button>
         <div class="header">
           <h1 id="titleClick" class="clickable-title" title="点击查看使用说明">墨墨云词本</h1>
-          <p>快速添加单词到墨墨背单词</p>
         </div>
         
         <div class="settings-section">
@@ -204,8 +268,6 @@ class MaimemoPlugin {
   }
 
   loadSettings() {
-    this.loadTheme();
-    
     if (window.utools) {
       try {
         const tokenData = utools.db.get('maimemo_token');
@@ -498,7 +560,7 @@ class MaimemoPlugin {
         document.getElementById('notepadId'),
         document.getElementById('words')
       ];
-      
+
       for (const input of inputs) {
         if (input && !input.value.trim()) {
           input.focus();
@@ -506,6 +568,11 @@ class MaimemoPlugin {
         }
       }
     }, 200);
+  }
+
+  // 清理资源
+  destroy() {
+    this.stopThemeMonitoring();
   }
 }
 
